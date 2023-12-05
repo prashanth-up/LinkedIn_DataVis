@@ -6,7 +6,6 @@ import plotly.graph_objects as go
 def app():
     st.title("Mutual Connections Visualizer")
 
-    # File upload
     uploaded_file_1 = st.file_uploader("Upload connections.csv file for Person 1", key="file1")
     uploaded_file_2 = st.file_uploader("Upload connections.csv file for Person 2", key="file2")
 
@@ -14,19 +13,26 @@ def app():
         df1 = pd.read_csv(uploaded_file_1, skiprows=3)
         df2 = pd.read_csv(uploaded_file_2, skiprows=3)
 
-        # Dropdown for company and position filter
-        all_companies = list(set(df1['Company']).union(set(df2['Company'])))
-        all_positions = list(set(df1['Position']).union(set(df2['Position'])))
-        company_filter = st.selectbox("Filter by Company", ["All"] + all_companies)
-        position_filter = st.selectbox("Filter by Position", ["All"] + all_positions)
+        # Combined DataFrame
+        combined_df = pd.concat([df1, df2])
 
-        # Apply filters
-        if company_filter != "All":
-            df1 = df1[df1['Company'] == company_filter]
-            df2 = df2[df2['Company'] == company_filter]
-        if position_filter != "All":
-            df1 = df1[df1['Position'] == position_filter]
-            df2 = df2[df2['Position'] == position_filter]
+        # Unique companies and positions
+        all_companies = combined_df['Company'].dropna().unique().tolist()
+        all_positions = combined_df['Position'].dropna().unique().tolist()
+
+        # Company and Position Filters with dynamic updating
+        selected_company = st.selectbox("Filter by Company", ['All'] + all_companies, format_func=lambda x: '' if x == 'All' else x)
+        filtered_positions = ['All'] + list(combined_df[combined_df['Company'] == selected_company]['Position'].dropna().unique()) if selected_company != 'All' else all_positions
+        selected_position = st.selectbox("Filter by Position", filtered_positions, format_func=lambda x: '' if x == 'All' else x)
+
+        # Filter DataFrame based on selections
+        if selected_company != 'All':
+            df1 = df1[df1['Company'] == selected_company]
+            df2 = df2[df2['Company'] == selected_company]
+        if selected_position != 'All':
+            df1 = df1[df1['Position'] == selected_position]
+            df2 = df2[df2['Position'] == selected_position]
+
 
         # Identify mutual connections
         mutual_companies = set(df1['Company']).intersection(set(df2['Company']))
