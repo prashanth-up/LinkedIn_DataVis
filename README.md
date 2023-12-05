@@ -35,7 +35,7 @@ streamlit run merged.py
 
 This will open the application in your default web browser.
 
-OR just use it from 
+OR just use it from https://linkedin-data-vis.streamlit.app/
 
 ### How to Use
 Upload LinkedIn Data: Upload your LinkedIn connections CSV files.
